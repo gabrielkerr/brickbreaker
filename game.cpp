@@ -158,7 +158,8 @@ internal HitDirection get_hit_direction(std::vector<float> v)
 enum class Gamemode
 {
 	GM_GAMEPLAY,
-	GM_MENU
+	GM_MENU,
+	GM_GAMEOVER
 };
 
 
@@ -171,6 +172,9 @@ internal void
 simulate_game(Input* input, float dt)
 {
 	clear_screen(0x004ba0);
+
+	// Draw arena
+	draw_rect(0, 0, arena_half_size_x, arena_half_size_y, arena_color);
 
 	// If in gameplay, run the game as normal
 	if (Gamemode::GM_GAMEPLAY == gamemode)
@@ -196,10 +200,6 @@ simulate_game(Input* input, float dt)
 			ball_p_x += ball_v_x * dt;
 		}
 
-		//// Rendering ////
-
-		// Draw arena
-		draw_rect(0, 0, arena_half_size_x, arena_half_size_y, arena_color);
 
 		// Draw bricks
 		// Iterate through list of bricks and draw them.
@@ -296,8 +296,14 @@ simulate_game(Input* input, float dt)
 				ball_p_x = -arena_half_size_x + ball_half_size;
 				ball_v_x *= -1;
 			}
+
+			// Check if ball has passed paddle and trigger game over
+			if (ball_p_y < -40)
+			{
+				gamemode = Gamemode::GM_GAMEOVER;
+			}
 		}
-		// TODO Ball should move with player until space bar is hit to serve
+		// Ball should move with player until space bar is hit to serve
 		else
 		{
 			ball_p_x = player_1_p;
@@ -322,8 +328,15 @@ simulate_game(Input* input, float dt)
 		// Draw score
 		draw_number(player_1_score, -75, 40, 1, 0xeeeeee);
 	}
-	else
+	// Game over
+	else if (gamemode == Gamemode::GM_GAMEOVER)
 	{
-		// TODO Game menu and game over
+		draw_text("GAME", -25, 0, 1, 0xeeeeee);
+		draw_text("OVER", 5, 0, 1, 0xeeeeee);
+
+		// Draw score
+		draw_number(player_1_score, -75, 40, 1, 0xeeeeee);
+
+		// TODO Add option to play again
 	}
 }
